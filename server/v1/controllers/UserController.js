@@ -14,7 +14,7 @@ async function register(req, res){
             isDeleted: false
         });
         if(emailUser){
-            res.send("EMAIL_ALREADY_EXIST");
+            res.send("EMAIL_ALREADY_EXISTS");
         }
 
         if(req.body.phoneNo){
