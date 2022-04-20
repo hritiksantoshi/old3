@@ -146,13 +146,13 @@ async function gettaxis(req, res) {
             },
 
         },
-        // // {
-        // //     $project: {
-        // //         vehicleName: "$taxiinfo.name",
-        // //         vehicleType: "$taxiinfo.type",
-        // //         image: "$image"
-        // //     }
-        // // }
+        {
+            $project: {
+                vehicleName: "$taxiinfo.name",
+                vehicleType: "$taxiinfo.type",
+                image: "$image"
+            }
+        }
     ]).then((cab) => {
         console.log(cab);
         res.send(cab)
