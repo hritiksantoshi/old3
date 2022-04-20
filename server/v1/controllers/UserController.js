@@ -148,8 +148,8 @@ async function gettaxis(req, res) {
         },
         {
             $project: {
-                vehicleName: "$taxiinfo.name",
-                vehicleType: "$taxiinfo.type",
+                vehicleName: "$taxiinfo.vehicleName",
+                vehicleType: "$taxiinfo.vehicleType",
                 image: "$image"
             }
         }
