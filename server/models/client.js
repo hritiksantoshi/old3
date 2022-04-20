@@ -28,6 +28,14 @@ const clientModel = new Schema({
     date: {
         type: Date, default: ''
     },
+    time: {
+        type:String,
+        enum:['10am-11am','11am-12am','12am-1pm'],
+        default:'Select time'
+    },
+    carType: {
+        type: String,enum:['suv','xuv','hybrid']
+    },
     booking_status:{
         type:String,
         enum:['Booked','Pending','Rejected'],

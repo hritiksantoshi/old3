@@ -187,17 +187,12 @@ async function booktaxi(req, res) {
         }
         req.body.pickupadd = pickupadd;
 
-        let booking_user = await Model.User.findOne({ _id: req.userData._id });
+      //  let booking_user = await Model.User.findOne({ _id: req.userData._id });
         
-
-        if(booking_user.role == "driver"){
-            res.send("you_are_Not_a_user");
-        }
-        if(booking_user.role == "user"){
             let bookdata = req.body;
             bookdata.userId = req.userData._id; 
             let client = await Model.booktaxi(bookdata).save();
-        }
+        
     
 
         res.status(201);
@@ -210,6 +205,8 @@ async function booktaxi(req, res) {
     }
 
 }
+
+
 
 async function user_bookings(req,res){
     var userid = req.userData._id;
