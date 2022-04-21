@@ -7,7 +7,7 @@ const Service = require('../../services/index');
 
 
 
-
+//Api for User Registeration
 async function register(req, res) {
     try {
         const emailUser = await Model.User.findOne({
@@ -76,13 +76,105 @@ async function login(req, res) {
     }
 }
 
+// login_with_phone Api
+async function login_with_phone(req, res) {
+    try {
+        const userData = await Model.User.findOne({
+            phoneNo: req.body.phoneNo,
+            countryCode: req.body.countryCode,
+            isDeleted: false
+        });
+
+        if (!userData) {
+            res.send('THIS_USER_IS_NOT_REGISTERED');
+        }
+        let optData = await Model.Otp.findOne({
+            phoneNo: req.body.phoneNo,
+            countryCode: req.body.countryCode,
+            eventType: 'SEND_OTP'
+        });
+
+        if (optData)
+            await Model.Otp.deleteMany({
+                _id: optData._id
+            });
+        let sendOtpObj = req.body;
+        sendOtpObj.eventType = 'SEND_OTP';
+        sendOtpObj.message = 'Your otp code is {{otpCode}}';
+        sendOtpObj.userid = userData._id;
+        let otpData = await Service.OtpService.sendOtp(sendOtpObj);
+        res.send('OTP_CODE_SEND_TO_YOUR_REGISTER_PHONE_NUMBER');
+
+
+    }
+    catch (error) {
+        res.status(400).send(error);
+    }
+}
+
+async function sendOtp(req, res) {
+    try {
+        const userData = await Model.User.findOne({
+            phoneNo: req.body.phoneNo,
+            countryCode: req.body.countryCode,
+            isDeleted: false
+        });
+        if (userData) {
+            res.send('PHONE_NUMBER_ALREADY_EXISTS');
+        }
+        let optData = await Model.Otp.findOne({
+            phoneNo: req.body.phoneNo,
+            countryCode: req.body.countryCode,
+            eventType: 'SEND_OTP'
+        });
+        if (optData)
+            await Model.Otp.deleteMany({
+                _id: optData._id
+            });
+        let sendOtpObj = req.body;
+        sendOtpObj.eventType = 'SEND_OTP';
+        sendOtpObj.message = 'Your otp code is {{otpCode}}';
+        const otpData = await Service.OtpService.sendOtp(sendOtpObj);
+        console.log(otpData);
+        if (otpData) {
+            res.send('OTP_CODE_SEND_TO_YOUR_REGISTER_PHONE_NUMBER');
+        }
+    }
+    catch (error) {
+        res.status(400).send(error);
+    }
+}
+
+async function verifyOtp(req, res) {
+    try {
+
+        let sendOtpObj = req.body;
+        sendOtpObj.eventType = 'SEND_OTP';
+        const otpData = await Service.OtpService.verify(sendOtpObj);
+        if (!otpData) {
+            res.send('INVALID_OTP');
+        }
+        else {
+
+            let user = await Model.User.updateOne({ _id: otpData.userId }, { $set: { isVerify: true } });
+            let udata = await Model.User.findOne({ _id: otpData.userId });
+            let accesstoken = await universalFunction.jwtSign(udata);
+            console.log(accesstoken);
+            res.send('OTP_VERIFIED AND LOGGED_IN.');
+        }
+    }
+    catch (error) {
+        res.status(400).send(error);
+    }
+};
+
+
 
 // function for vehicle registeration
 
-async function owner(req, res) {
+async function user(req, res) {
     try {
 
-        
         let logged_user = await Model.User.findOne({ _id: req.userData._id })
         console.log(logged_user);
         if(logged_user.role == "driver"){
@@ -187,13 +279,16 @@ async function booktaxi(req, res) {
         }
         req.body.pickupadd = pickupadd;
 
-      //  let booking_user = await Model.User.findOne({ _id: req.userData._id });
-        
+        let booking_user = await Model.User.findOne({ _id: req.userData._id });
+        if(booking_user.role == "user"){
             let bookdata = req.body;
             bookdata.userId = req.userData._id; 
             let client = await Model.booktaxi(bookdata).save();
-        
-    
+          }
+          
+        if(booking_user.role !== "user" ){
+            res.send('YOU_ARE_NOT_REGISTERED_AS_USER');
+        }
 
         res.status(201);
         res.send(client);
@@ -243,137 +338,27 @@ async function user_bookings(req,res){
         });
 }
 
-async function sendOtp(req, res) {
-    try {
-        const userData = await Model.User.findOne({
-            phoneNo: req.body.phoneNo,
-            countryCode: req.body.countryCode,
-            isDeleted: false
-        });
-        if (userData) {
-            res.send('PHONE_NUMBER_ALREADY_EXISTS');
-        }
-        let optData = await Model.Otp.findOne({
-            phoneNo: req.body.phoneNo,
-            countryCode: req.body.countryCode,
-            eventType: 'SEND_OTP'
-        });
-        if (optData)
-            await Model.Otp.deleteMany({
-                _id: optData._id
-            });
-        let sendOtpObj = req.body;
-        sendOtpObj.eventType = 'SEND_OTP';
-        sendOtpObj.message = 'Your otp code is {{otpCode}}';
-        const otpData = await Service.OtpService.sendOtp(sendOtpObj);
-        console.log(otpData);
-        if (otpData) {
-            res.send('OTP_CODE_SEND_TO_YOUR_REGISTER_PHONE_NUMBER');
-        }
-    }
-    catch (error) {
-        res.status(400).send(error);
-    }
-}
-
-async function verifyOtp(req, res) {
-    try {
-
-        let sendOtpObj = req.body;
-        sendOtpObj.eventType = 'SEND_OTP';
-        const otpData = await Service.OtpService.verify(sendOtpObj);
-        if (!otpData) {
-            res.send('INVALID_OTP');
-        }
-        else {
-
-            let user = await Model.User.updateOne({ _id: otpData.userId }, { $set: { isVerify: true } });
-            let udata = await Model.User.findOne({ _id: otpData.userId });
-            let accesstoken = await universalFunction.jwtSign(udata);
-            console.log(accesstoken);
-            res.send('OTP_VERIFIED AND LOGGED_IN.');
-        }
-    }
-    catch (error) {
-        res.status(400).send(error);
-    }
-};
 
 
 
-// login_with_phone Api
-async function login_with_phone(req, res) {
-    try {
-        const userData = await Model.User.findOne({
-            phoneNo: req.body.phoneNo,
-            countryCode: req.body.countryCode,
-            isDeleted: false
-        });
 
-        if (!userData) {
-            res.send('THIS_USER_IS_NOT_REGISTERED');
-        }
-        let optData = await Model.Otp.findOne({
-            phoneNo: req.body.phoneNo,
-            countryCode: req.body.countryCode,
-            eventType: 'SEND_OTP'
-        });
-
-        if (optData)
-            await Model.Otp.deleteMany({
-                _id: optData._id
-            });
-        let sendOtpObj = req.body;
-        sendOtpObj.eventType = 'SEND_OTP';
-        sendOtpObj.message = 'Your otp code is {{otpCode}}';
-        sendOtpObj.userid = userData._id;
-        let otpData = await Service.OtpService.sendOtp(sendOtpObj);
-        res.send('OTP_CODE_SEND_TO_YOUR_REGISTER_PHONE_NUMBER');
-
-
-    }
-    catch (error) {
-        res.status(400).send(error);
-    }
-}
-const arrOfNum = [1, 2, 2, 4, 5, 6, 6];
-console.log(getUniqueValues(arrOfNum));
-
-function getUniqueValues(arrOfNum) {
-    const set = new Set(arrOfNum);
-    return [...set];
-  }
-
-  var arr = [4,10,1,15,2]
-
-
-  let bubbleSort = (inputArr) => {
-    let len = inputArr.length;
-    for (let i = 0; i < len; i++) {
-        for (let j = 0; j < len; j++) {
-            if (inputArr[j] > inputArr[j + 1]) {
-                let tmp = inputArr[j];
-                inputArr[j] = inputArr[j + 1];
-                inputArr[j + 1] = tmp;
-            }
-        }
-    }
-    return inputArr;
-};
-bubbleSort(arr);
-console.log(arr);
 
 
 
 
 module.exports = {
-    owner: owner,
-    gettaxis: gettaxis,
-    booktaxi: booktaxi,
     register: register,
     login: login,
+    login_with_phone: login_with_phone,
     sendOtp: sendOtp,
     verifyOtp: verifyOtp,
-    login_with_phone: login_with_phone,
+    user: user,
+    gettaxis: gettaxis,
+    booktaxi: booktaxi,
     user_bookings:user_bookings
 }
+    
+    
+    
+  
+  
