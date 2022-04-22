@@ -15,4 +15,6 @@ router.get('/gettaxis',Controller.gettaxis);
 
 
 router.get('/user_bookings',Authorization.userAuth,Controller.user_bookings);
+router.get('/gettaxis_byuser',Controller.gettaxis_byuser);
+router.get('/bookings_request',Authorization.userAuth,Controller.bookings_request);
 module.exports = router;

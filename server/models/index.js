@@ -1,6 +1,6 @@
 module.exports = {
-    booktaxi : require('./client'),
-    Vehicleimg : require('./images'),
+    booktaxi : require('./book'),
+    Vehicleimg : require('./vimages'),
     Vehicleowner : require('./vehicle'),
     User: require('./User'),
     Otp : require('./Otp')

@@ -177,35 +177,35 @@ async function user(req, res) {
 
         let logged_user = await Model.User.findOne({ _id: req.userData._id })
         console.log(logged_user);
-        if(logged_user.role == "driver"){
-        let driver = req.body;
-        driver.userId = req.userData._id;
-        let data = await Model.Vehicleowner(driver).save();
+        if (logged_user.role == "driver") {
+            let driver = req.body;
+            driver.userId = req.userData._id;
+            let data = await Model.Vehicleowner(driver).save();
 
-        if (req.files.length > 0) {
-            await req.files.forEach(file => {
+            if (req.files.length > 0) {
+                await req.files.forEach(file => {
 
-                let book = Model.Vehicleimg({
-                    image: file.path,
-                    vehicleId: data._id
-                })
-                book.save();
-            });
+                    let book = Model.Vehicleimg({
+                        image: file.path,
+                        vehicleId: data._id
+                    })
+                    book.save();
+                });
 
+            }
+            else {
+                res.send("no file");
+            }
+
+            res.status(201);
+            res.send(data);
         }
         else {
-            res.send("no file");
+            res.send("User not registered as driver.");
         }
 
-        res.status(201);
-        res.send(data);
-    }
-    else{
-        res.send("User not registered as driver.");
-    }
 
-
-}
+    }
     catch (error) {
         res.status(400).send(error);
     }
@@ -227,7 +227,7 @@ async function gettaxis(req, res) {
             },
 
         },
-       
+
         {
             $lookup: {
                 from: 'images',
@@ -280,19 +280,20 @@ async function booktaxi(req, res) {
         req.body.pickupadd = pickupadd;
 
         let booking_user = await Model.User.findOne({ _id: req.userData._id });
-        if(booking_user.role == "user"){
+        if (booking_user.role == "user") {
             let bookdata = req.body;
-            bookdata.userId = req.userData._id; 
+            bookdata.userId = req.userData._id;
             let client = await Model.booktaxi(bookdata).save();
-          }
-          
-        if(booking_user.role !== "user" ){
+            res.status(201);
+            res.send(client);
+            console.log(client);
+        }
+
+        if (booking_user.role !== "user") {
             res.send('YOU_ARE_NOT_REGISTERED_AS_USER');
         }
 
-        res.status(201);
-        res.send(client);
-        console.log(client);
+
 
     }
     catch (error) {
@@ -303,7 +304,7 @@ async function booktaxi(req, res) {
 
 
 
-async function user_bookings(req,res){
+async function user_bookings(req, res) {
     var userid = req.userData._id;
 
     let booking = await Model.booktaxi.aggregate([
@@ -323,11 +324,17 @@ async function user_bookings(req,res){
 
 
         },
-        // {
-        //     $project: {
-        //         Booked_by:"$user.firstName"
-        //     }
-        // }
+        {
+            $project: {
+                Booked_by: "$name",
+                Passengers: "$passenger",
+                time: "$time",
+                carType: "$carType",
+                booking_status: "$booking_status",
+                accepted_by: "$accepted_by"
+
+            }
+        }
 
     ]).then((booking) => {
         console.log(booking);
@@ -338,7 +345,46 @@ async function user_bookings(req,res){
         });
 }
 
+async function gettaxis_byuser(req, res) {
+     console.log(typeof req.query.carType);
+    let scar = await Model.Vehicleowner.find({ vehicleType: req.query.carType });
+    res.send(scar);
+    res.status(201);
+}
 
+async function bookings_request(req, res) {
+    
+    var driver_id = req.userData._id;
+    let driver_vehicle = await Model.User.findOne({_id:driver_id });
+     if(driver_vehicle.role == 'driver'){
+         let book_request = await Model.Vehicleowner.aggregate([
+            {
+                $match: {
+                    userId: mongoose.Types.ObjectId(driver_id)
+                }
+            },
+            {
+                $lookup: {
+                    from: 'bookings',
+                    localField: 'vehicleType',
+                    foreignField: 'carType',
+                    as: 'showbooking'
+    
+                },
+    
+    
+            },
+    
+         ]).then((book_request) => {
+            console.log(book_request);
+            res.send(book_request)
+        })
+            .catch((error) => {
+                console.log(error);
+            });     
+        
+        }  
+}
 
 
 
@@ -355,10 +401,11 @@ module.exports = {
     user: user,
     gettaxis: gettaxis,
     booktaxi: booktaxi,
-    user_bookings:user_bookings
+    user_bookings: user_bookings,
+    gettaxis_byuser: gettaxis_byuser,
+    bookings_request:bookings_request
 }
-    
-    
-    
-  
-  
+
+
+
+
