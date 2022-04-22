@@ -3,7 +3,7 @@ const uploadimg = require('.././services/FileUploadService');
 const Authorization = require('../policies/authorized');
 const express = require('express');
 const router = express.Router();
-router.post('/register',uploadimg.vehicleimg.single('profilePic'), Controller.register);
+router.post('/register', Controller.register);
 router.post('/login', Controller.login);
 router.post('/login_with_phone', Controller.login_with_phone);
 router.post('/sendOtp', Controller.sendOtp);
