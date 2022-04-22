@@ -2,12 +2,14 @@ const config = require('./config/config');
 const connection = require('./connection/connect');
 const bodyParser = require('body-parser');
 const express = require('express');
+const cors = require('cors');
 const app = express();
 const route = require('./route');
 const server = require('http').createServer(app);
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
+app.use(cors());
 
 app.use('/api', route);
 // const multer = require("multer")
