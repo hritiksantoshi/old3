@@ -28,7 +28,7 @@ const UserModel = new Schema({
     role:{
         type: String , 
         enum:['user','driver'],
-        default: 'NO_PREFRENCE'
+        default: 'user'
     },
     profilePic: {
         type:String , default:''
