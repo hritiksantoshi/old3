@@ -28,10 +28,10 @@ async function register(req, res) {
             }
         }
 
-        req.body.profilePic = '';
-        if (req.file && req.file.path) {
-            req.body.profilePic = `${req.file.path}`;
-        }
+       // req.body.profilePic = '';
+        //if (req.file && req.file.path) {
+         //   req.body.profilePic = `${req.file.path}`;
+        //}
         let user = await Model.User(req.body).save();
         res.status(201);
         res.send(user);
