@@ -363,6 +363,17 @@ async function gettaxis_byuser(req, res) {
 
 
     },
+    {
+        $project: {
+            image: "$taxes.image",
+            vehicleName: "$vehicleName",
+            Model: "$vehicleModel",
+            carType: "$vehicleType",
+            Perhourrate: "$hourlyRate",
+            Perdayrate: "$perdayRate"
+
+        }
+    }
 
    ]).then((taxi) => {
     console.log(taxi);
