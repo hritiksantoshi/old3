@@ -30,9 +30,9 @@ const UserModel = new Schema({
         enum:['user','driver'],
         default: 'user'
     },
-    // profilePic: {
-    //     type:String , default:''
-    // },
+    profilePic: {
+        type:String , default:''
+    },
     isDeleted:{
         type: Boolean,
         default: false

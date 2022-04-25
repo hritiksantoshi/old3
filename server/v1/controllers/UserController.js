@@ -346,10 +346,31 @@ async function user_bookings(req, res) {
 }
 
 async function gettaxis_byuser(req, res) {
-     console.log(typeof req.query.carType);
-    let scar = await Model.Vehicleowner.find({ vehicleType: req.query.carType });
-    res.send(scar);
-    res.status(201);
+   let taxi = await Model.Vehicleowner.aggregate([
+    {
+        $match: {
+            vehicleType: req.query.carType
+        }
+    },
+    {
+        $lookup: {
+            from: 'images',
+            localField: '_id',
+            foreignField: 'vehicleId',
+            as: 'taxes'
+
+        },
+
+
+    },
+
+   ]).then((taxi) => {
+    console.log(taxi);
+    res.send(taxi)
+})
+    .catch((error) => {
+        console.log(error);
+    });    
 }
 
 async function bookings_request(req, res) {
@@ -386,6 +407,19 @@ async function bookings_request(req, res) {
         }  
 }
 
+async function accepted_by(req,res){
+    try{
+        var d_id = req.userData._id;
+        let driver = await Model.User.findOne({_id:d_id});
+        console.log(driver.firstName);
+        let booking = await Model.booktaxi.updateOne({ _id:req.query.id}, { $set: {booking_status: 'Booked',accepted_by:driver.firstName } });
+        console.log(booking);
+    }
+    catch (error) {
+        res.status(400).send(error);
+    }
+} 
+
 
 
 
@@ -403,7 +437,8 @@ module.exports = {
     booktaxi: booktaxi,
     user_bookings: user_bookings,
     gettaxis_byuser: gettaxis_byuser,
-    bookings_request:bookings_request
+    bookings_request:bookings_request,
+    accepted_by:accepted_by
 }
 
 
