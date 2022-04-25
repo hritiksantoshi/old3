@@ -10,6 +10,7 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cors());
+vapp.use('/static', express.static(path.join(__dirname, '../server/uploads/')));
 
 app.use('/api', route);
 // const multer = require("multer")

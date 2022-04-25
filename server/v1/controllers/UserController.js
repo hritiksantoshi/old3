@@ -35,7 +35,7 @@ async function register(req, res) {
         let userdata = req.body;
         userdata.profilePic = req.file.path;
 
-        let user = await Model.User(req.body).save();
+        let user = await Model.User(userdata).save();
         res.status(201);
         res.send(user);
         console.log(user);
