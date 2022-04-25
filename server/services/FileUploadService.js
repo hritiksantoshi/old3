@@ -2,9 +2,9 @@ const multer = require('multer');
 const userUpload = multer.diskStorage({
     destination: function (req, file, cb) {
         if(file.fieldname === "profilePic"){
-        cb(null, './uploads/user')
+        cb(null, 'uploads/user')
         }else{
-            cb(null, './uploads/vehiclimages')
+            cb(null, 'uploads/vehiclimages')
         }
     },
     filename: function (req, file, cb) {
