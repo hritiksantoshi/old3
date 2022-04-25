@@ -32,18 +32,13 @@ async function register(req, res) {
         //if (req.file && req.file.path) {
          //   req.body.profilePic = `${req.file.path}`;
         //}
-        
-        // let userregister = req.body;
-        // userdata.profilePic = req.file.path;
-        
+        let userdata = req.body;
+        userdata.profilePic = req.file.path;
 
-        let user = await Model.User(req.body)
-        let userdata = req.file.path;
-        Object.assign(user,{profilePic:userdata});
-        let rest= await user.save();
+        let user = await Model.User(req.body).save();
         res.status(201);
-        res.send(rest);
-        console.log(rest);
+        res.send(user);
+        console.log(user);
 
     }
     catch (error) {

@@ -31,7 +31,7 @@ const UserModel = new Schema({
         default: 'user'
     },
     profilePic: {
-        type:String , default:''
+        type:String 
     },
     isDeleted:{
         type: Boolean,
